@@ -1,0 +1,11 @@
+.env
+node_modules
+.next
+__pycache__
+dist
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+.DS_Store
