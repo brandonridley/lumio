@@ -1,0 +1,48 @@
+services:
+  api:
+    build: ./backend
+    env_file: .env
+    depends_on: [postgres, redis]
+    networks: [lumio]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: ./frontend
+    env_file: .env
+    depends_on: [api]
+    networks: [lumio]
+
+  caddy:
+    image: caddy:2
+    volumes:
+      - ./ops/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    ports: ["80:80","443:443"]
+    depends_on: [web, api]
+    networks: [lumio]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lumio
+      POSTGRES_USER: lumio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [lumio]
+
+  redis:
+    image: redis:7
+    networks: [lumio]
+
+volumes:
+  pgdata: {}
+  caddy_data: {}
+  caddy_config: {}
+
+networks:
+  lumio: {}
